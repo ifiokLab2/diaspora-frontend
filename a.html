@@ -1,0 +1,443 @@
+<h1 class="code-line" data-line-start=0 data-line-end=1 ><a id="Project_Documentation_ECommerce__Listings_Platform_0"></a>Project Documentation: E-Commerce &amp; Listings Platform</h1>
+<hr>
+<h2 class="code-line" data-line-start=4 data-line-end=5 ><a id="1_Project_Overview_4"></a>1. Project Overview</h2>
+<p class="has-line-data" data-line-start="6" data-line-end="7">Diaspora Black is a high-performance, hybrid marketplace that integrates traditional Retail E-Commerce (physical products) with a Service Listings engine (professional services). The platform is built with a decoupled architecture to ensure high scalability, SEO optimization, and a seamless multi-tenant experience for both Sellers and Customers…</p>
+<ul>
+<li class="has-line-data" data-line-start="8" data-line-end="9"><strong>Retail E-Commerce</strong> (physical goods)</li>
+<li class="has-line-data" data-line-start="9" data-line-end="10"><strong>Service Listings Marketplace</strong> (professional services)</li>
+</ul>
+<hr>
+<h2 class="code-line" data-line-start=15 data-line-end=16 ><a id="2_Features_and_Functionalities_15"></a>2. Features and Functionalities</h2>
+<h3 class="code-line" data-line-start=17 data-line-end=18 ><a id="_User_Capabilities_Customers_17"></a>👤 User Capabilities (Customers)</h3>
+<ul>
+<li class="has-line-data" data-line-start="19" data-line-end="20"><strong>Authentication</strong>: JWT-based secure login and registration</li>
+<li class="has-line-data" data-line-start="20" data-line-end="22"><strong>Discovery</strong>: Advanced search and suggestions for products and<br>
+services</li>
+<li class="has-line-data" data-line-start="22" data-line-end="24"><strong>Shopping Cart</strong>: Real-time cart management with quantity<br>
+adjustments</li>
+<li class="has-line-data" data-line-start="24" data-line-end="25"><strong>Secure Checkout</strong>: Integrated payment flow using Stripe API</li>
+<li class="has-line-data" data-line-start="25" data-line-end="26"><strong>Wishlist</strong>: Save products for later</li>
+<li class="has-line-data" data-line-start="26" data-line-end="27"><strong>Smart Media Handling</strong>: Integrated with Cloudinary for automated image optimization. Supports a “Main Image” and a &quot;Multi-Image Gallery.</li>
+<li class="has-line-data" data-line-start="27" data-line-end="30"><strong>Geographic Hierarchy:</strong>: Products are tagged with Latitude/Longitude coordinates for real time product location discovery.<br>
+<strong>Category System</strong>: Organized taxonomy allowing users to filter products by specific industries (e.g., Arts, Fashion, Electronics).</li>
+</ul>
+<hr>
+<h2 class="code-line" data-line-start=32 data-line-end=33 ><a id="Seller_Capabilities__Merchant_Ecosystem_32"></a>Seller Capabilities &amp; Merchant Ecosystem</h2>
+<p class="has-line-data" data-line-start="34" data-line-end="35">The Seller module is the engine of the marketplace, allowing independent vendors to transition from basic registration to a fully operational digital storefront.</p>
+<h3 class="code-line" data-line-start=36 data-line-end=37 ><a id="1_Shop_Management_The_Digital_Identity_36"></a>1. Shop Management: The Digital Identity</h3>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Section</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ShopProfile</td>
+<td>The ShopProfile serves as the merchant’s brand anchor. Unlike a standard user profile, the ShopProfile contains sensitive commercial and branding data.</td>
+</tr>
+<tr>
+<td>Professional Branding</td>
+<td>Sellers can upload high-resolution logos and banners. The system utilizes Cloudinary’s transformation API to automatically resize these assets for different UI components (e.g., circular thumbnails in search results vs. wide banners on shop pages).</td>
+</tr>
+<tr>
+<td>Business Credentials</td>
+<td>Includes fields for Business Registration Numbers (RC/TIN), ensuring compliance with local marketplace regulations.</td>
+</tr>
+<tr>
+<td>Banking &amp; Settlement Logic</td>
+<td>Sellers must provide a Sort Code and Account Number. This data is encrypted at rest and is used by the backend to automate the routing of funds during the payout cycle.</td>
+</tr>
+<tr>
+<td>Location SEO</td>
+<td>Shops are indexed by Country and City, allowing the “Shops Near Me” feature to function via targeted PostgreSQL queries.</td>
+</tr>
+</tbody>
+</table>
+<h3 class="code-line" data-line-start=46 data-line-end=47 ><a id="2_Product__Service_Management_Listing_CRUD_46"></a>2. Product &amp; Service Management (Listing CRUD)</h3>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Section</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Overview</td>
+<td>The platform distinguishes between Physical Products (inventory-based) and Professional Services (time or project-based).</td>
+</tr>
+<tr>
+<td>Multi-Image Gallery Support</td>
+<td>Sellers can upload multiple images per listing. The backend handles this via a ProductImage model with a ForeignKey relationship to the main Product. This allows for a dedicated “Gallery Slider” on the frontend.</td>
+</tr>
+<tr>
+<td>Unique Slug Architecture</td>
+<td>To ensure SEO-friendly URLs, every listing generates a unique slug. If a seller lists “White T-Shirt” and another seller does the same, the system appends a short UUID (e.g., /products/white-t-shirt-8f2b) to prevent routing conflicts.</td>
+</tr>
+<tr>
+<td>Pricing Models</td>
+<td>Physical: Supports original_price and discount_price, automatically calculating the “Percentage Off” badge. Services: Supports Fixed, Hourly, and Negotiable pricing structures to accommodate different professional industries.</td>
+</tr>
+</tbody>
+</table>
+<h3 class="code-line" data-line-start=55 data-line-end=56 ><a id="3_Analytics_Dashboard_DataDriven_Growth_55"></a>3. Analytics Dashboard: Data-Driven Growth</h3>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Section</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sales &amp; Order History</td>
+<td>A filtered view of the Order table showing only the items belonging to that specific seller. It tracks the status of each item (Pending, Shipped, Delivered, or Cancelled).</td>
+</tr>
+<tr>
+<td>Listing Visibility (Traffic Tracking)</td>
+<td>Utilizing the ListingView model, the system logs daily unique views.</td>
+</tr>
+<tr>
+<td>Technical Implementation</td>
+<td>When a customer views a listing, the backend checks: ListingView.objects.get_or_create(listing=listing, date=today). It then increments the view_count.</td>
+</tr>
+<tr>
+<td>Performance Visualization</td>
+<td>This data is served via a specialized API endpoint that returns a time-series JSON object, which the Next.js frontend renders into interactive line and bar charts (using libraries like Recharts or Chart.js).</td>
+</tr>
+</tbody>
+</table>
+<h3 class="code-line" data-line-start=64 data-line-end=65 ><a id="4_Payouts__Financial_Lifecycle_64"></a>4. Payouts &amp; Financial Lifecycle</h3>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Section</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wallet Balance Logic</td>
+<td>The system tracks Pending Balance (funds from orders not yet delivered) and Available Balance (funds cleared for withdrawal).</td>
+</tr>
+<tr>
+<td>Withdrawal Requests</td>
+<td>Sellers can trigger a withdrawal request. The system validates the Available Balance against the requested amount before creating a Payout record.</td>
+</tr>
+<tr>
+<td>Stripe Connect Integration (Future-Ready)</td>
+<td>While currently handling manual payouts via banking details, the architecture is designed to integrate with Stripe Connect for automated split payments and instant seller onboarding.</td>
+</tr>
+<tr>
+<td>Transaction Logs</td>
+<td>A transparent ledger for the seller, showing a history of every credit (sale) and debit (withdrawal/marketplace fee).</td>
+</tr>
+</tbody>
+</table>
+<h2 class="code-line" data-line-start=73 data-line-end=74 ><a id="Summary_Table_for_Developers_73"></a>Summary Table for Developers</h2>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Feature</th>
+<th>Backend Implementation</th>
+<th>Frontend Component</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shop Setup</td>
+<td>ShopProfileUpdateSerializer</td>
+<td>EditShopForm.tsx</td>
+</tr>
+<tr>
+<td>Gallery Upload</td>
+<td>MultiPartParser + Cloudinary</td>
+<td>ImageDropzone.tsx</td>
+</tr>
+<tr>
+<td>Analytics</td>
+<td>ListingView Aggregation</td>
+<td>SellerLineChart.tsx</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>IsSeller Permission Class</td>
+<td>withAuth HOC</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 class="code-line" data-line-start=84 data-line-end=85 ><a id="3_System_Architecture_84"></a>3. System Architecture</h2>
+<p class="has-line-data" data-line-start="86" data-line-end="87">The application follows a <strong>decoupled Client-Server Architecture</strong>:</p>
+<h3 class="code-line" data-line-start=88 data-line-end=89 ><a id="Frontend_Nextjs_88"></a>Frontend (Next.js)</h3>
+<ul>
+<li class="has-line-data" data-line-start="90" data-line-end="91">Handles UI/UX</li>
+<li class="has-line-data" data-line-start="91" data-line-end="92">Client-side routing</li>
+<li class="has-line-data" data-line-start="92" data-line-end="93">State management</li>
+<li class="has-line-data" data-line-start="93" data-line-end="95">Communicates via REST APIs</li>
+</ul>
+<h3 class="code-line" data-line-start=95 data-line-end=96 ><a id="Backend_Django_REST_Framework_95"></a>Backend (Django REST Framework)</h3>
+<ul>
+<li class="has-line-data" data-line-start="97" data-line-end="98">Business logic</li>
+<li class="has-line-data" data-line-start="98" data-line-end="99">Authentication (JWT)</li>
+<li class="has-line-data" data-line-start="99" data-line-end="100">Database ORM using PostGreSQL</li>
+<li class="has-line-data" data-line-start="100" data-line-end="102">Third-party integrations</li>
+</ul>
+<h3 class="code-line" data-line-start=102 data-line-end=103 ><a id="Media_Pipeline_102"></a>Media Pipeline</h3>
+<ul>
+<li class="has-line-data" data-line-start="104" data-line-end="105">Images are <strong>not stored locally</strong></li>
+<li class="has-line-data" data-line-start="105" data-line-end="106">Uploaded to <strong>Cloudinary</strong></li>
+<li class="has-line-data" data-line-start="106" data-line-end="108">Delivered via CDN</li>
+</ul>
+<hr>
+<h2 class="code-line" data-line-start=110 data-line-end=111 ><a id="4_Tech_Stack_Explanation_110"></a>4. Tech Stack Explanation</h2>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Reason for Choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frontend</td>
+<td>Next.js 14+</td>
+<td>SEO optimization via SSR and fast page transitions.</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td>Django / DRF</td>
+<td>Rapid development, robust security features, and powerful ORM.</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL</td>
+<td>Relational integrity for complex Order/Product relationships.</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>SimpleJWT</td>
+<td>Stateless authentication ideal for scalable web apps.</td>
+</tr>
+<tr>
+<td>Styling</td>
+<td>Tailwind CSS</td>
+<td>Utility-first styling for responsive, modern design.</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>Cloudinary</td>
+<td>Automatic image resizing and fast delivery.</td>
+</tr>
+<tr>
+<td>State</td>
+<td>Zustand</td>
+<td>Used for cart state management.</td>
+</tr>
+<tr>
+<td>State</td>
+<td>React Context</td>
+<td>Used for user data management.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 class="code-line" data-line-start=127 data-line-end=128 ><a id="5_Installation_and_Setup_Guide_127"></a>5. Installation and Setup Guide</h2>
+<h3 class="code-line" data-line-start=129 data-line-end=130 ><a id="Backend_Setup_129"></a>Backend Setup</h3>
+<pre><code class="has-line-data" data-line-start="132" data-line-end="143" class="language-bash">git <span class="hljs-built_in">clone</span> &lt;repo-url&gt;
+<span class="hljs-built_in">cd</span> backend
+
+python -m venv venv
+<span class="hljs-built_in">source</span> venv/bin/activate   <span class="hljs-comment"># Windows: venv\Scripts\activate</span>
+
+pip install -r requirements.txt
+
+python manage.py migrate
+python manage.py runserver
+</code></pre>
+<hr>
+<p class="has-line-data" data-line-start="146" data-line-end="147">###Frontend Setup</p>
+<pre><code class="has-line-data" data-line-start="149" data-line-end="154" class="language-bash"><span class="hljs-built_in">cd</span> diaspora-frontend
+
+npm install
+npm run dev
+</code></pre>
+<hr>
+<h2 class="code-line" data-line-start=157 data-line-end=158 ><a id="6_Environment_Variables_Configuration_157"></a>6. Environment Variables Configuration</h2>
+<h3 class="code-line" data-line-start=159 data-line-end=160 ><a id="Backend_env_159"></a>Backend (.env)</h3>
+<pre><code class="has-line-data" data-line-start="162" data-line-end="168" class="language-env">CLOUDINARY_CLOUD_NAME=&quot;&quot;
+CLOUDINARY_API_KEY=&quot;&quot;
+CLOUDINARY_API_SECRET=&quot;&quot;
+CLOUDINARY_URL=&quot;&quot;
+DATABASE_URL = &quot;&quot;
+</code></pre>
+<hr>
+<h3 class="code-line" data-line-start=171 data-line-end=172 ><a id="Frontend_envlocal_171"></a>Frontend (.env.local)</h3>
+<pre><code class="has-line-data" data-line-start="174" data-line-end="177" class="language-env">NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+
+</code></pre>
+<hr>
+<h2 class="code-line" data-line-start=180 data-line-end=181 ><a id="7_API_Structure_and_Endpoints_180"></a>7. API Structure and Endpoints</h2>
+<h3 class="code-line" data-line-start=182 data-line-end=183 ><a id="Authentication_182"></a>Authentication</h3>
+<pre><code>POST /api/auth/token/
+POST /api/auth/customer/register/
+</code></pre>
+<hr>
+<h3 class="code-line" data-line-start=189 data-line-end=190 ><a id="_Products__Listings_189"></a>️ Products &amp; Listings</h3>
+<pre><code>GET  /api/products/
+POST /api/products-manage/
+GET  /api/listings/public/&lt;slug&gt;/
+</code></pre>
+<hr>
+<h3 class="code-line" data-line-start=197 data-line-end=198 ><a id="Orders__Cart_197"></a>Orders &amp; Cart</h3>
+<pre><code>POST /api/cart/add/
+POST /api/orders/
+</code></pre>
+<hr>
+<h2 class="code-line" data-line-start=204 data-line-end=205 ><a id="8_Authentication_Flow_JWT_204"></a>8. Authentication Flow (JWT)</h2>
+<ol>
+<li class="has-line-data" data-line-start="206" data-line-end="207">User sends credentials → <code>/auth/token/</code></li>
+<li class="has-line-data" data-line-start="207" data-line-end="208">Server returns access and refresh tokens</li>
+<li class="has-line-data" data-line-start="208" data-line-end="209">Tokens stored securely</li>
+<li class="has-line-data" data-line-start="209" data-line-end="211">Requests include:</li>
+</ol>
+<pre><code class="has-line-data" data-line-start="212" data-line-end="214" class="language-{=html}">&lt;!-- --&gt;
+</code></pre>
+<pre><code>Authorization: Bearer &lt;access_token&gt;
+</code></pre>
+<hr>
+<h2 class="code-line" data-line-start=218 data-line-end=219 ><a id="9_Core_Models_Overview_218"></a>9. Core Models Overview</h2>
+<h3 class="code-line" data-line-start=220 data-line-end=221 ><a id="MyUser_220"></a>MyUser</h3>
+<ul>
+<li class="has-line-data" data-line-start="222" data-line-end="223">Custom user model</li>
+<li class="has-line-data" data-line-start="223" data-line-end="225">Roles: seller / customer</li>
+</ul>
+<h3 class="code-line" data-line-start=225 data-line-end=226 ><a id="Product_225"></a>Product</h3>
+<ul>
+<li class="has-line-data" data-line-start="227" data-line-end="228">Physical goods</li>
+<li class="has-line-data" data-line-start="228" data-line-end="230">Linked to seller and category</li>
+</ul>
+<h3 class="code-line" data-line-start=230 data-line-end=231 ><a id="Listing_230"></a>Listing</h3>
+<ul>
+<li class="has-line-data" data-line-start="232" data-line-end="233">Service-based\</li>
+<li class="has-line-data" data-line-start="233" data-line-end="235">Pricing models: Fixed, Hourly, Negotiable</li>
+</ul>
+<h3 class="code-line" data-line-start=235 data-line-end=236 ><a id="Order__OrderItem_235"></a>Order / OrderItem</h3>
+<ul>
+<li class="has-line-data" data-line-start="237" data-line-end="239">Snapshot pricing at purchase</li>
+</ul>
+<h3 class="code-line" data-line-start=239 data-line-end=240 ><a id="ShopProfile_239"></a>ShopProfile</h3>
+<ul>
+<li class="has-line-data" data-line-start="241" data-line-end="243">Seller business + banking info</li>
+</ul>
+<hr>
+<h2 class="code-line" data-line-start=245 data-line-end=246 ><a id="10_Common_Workflows_245"></a>10. Common Workflows</h2>
+<h3 class="code-line" data-line-start=247 data-line-end=248 ><a id="Purchase_Workflow_247"></a>Purchase Workflow</h3>
+<ol>
+<li class="has-line-data" data-line-start="249" data-line-end="250">Discovery</li>
+<li class="has-line-data" data-line-start="250" data-line-end="251">Add to cart</li>
+<li class="has-line-data" data-line-start="251" data-line-end="252">Create order</li>
+<li class="has-line-data" data-line-start="252" data-line-end="253">Pay via STRIPE</li>
+<li class="has-line-data" data-line-start="253" data-line-end="254">Verify payment</li>
+<li class="has-line-data" data-line-start="254" data-line-end="256">Order marked as Paid</li>
+</ol>
+<h2 class="code-line" data-line-start=256 data-line-end=257 ><a id="Data_Flow__Request_Lifecycle_256"></a>Data Flow &amp; Request Lifecycle</h2>
+<p class="has-line-data" data-line-start="258" data-line-end="259">This section describes the high-speed communication between the Next.js Client, the Django API, and the PostgreSQL Database.</p>
+<h3 class="code-line" data-line-start=260 data-line-end=261 ><a id="The_Search_Query_Journey_260"></a>The Search Query Journey</h3>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Step</th>
+<th>Title</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>The Client Trigger (Frontend)</td>
+<td>Action: A user enters a keyword (e.g., “Vintage Camera”) into the SearchBar component. Logic: The Next.js frontend uses a “debounce” function to wait until the user stops typing, then initiates a GET request to the backend. Endpoint: GET /api/search/products/?q=vintage+camera</td>
+</tr>
+<tr>
+<td>2</td>
+<td>The Gateway &amp; Middleware (Backend)</td>
+<td>Reception: The request hits the Django URL dispatcher (<a href="http://urls.py">urls.py</a>). Security Check: If the user is logged in, the JWT Middleware validates the token. If they are a guest, the PublicPermission allows the search to proceed. Routing: The request is handed over to the ProductSearchListView.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Database Query (ORM Layer)</td>
+<td>Processing: Django converts the search string into a SQL query. Logic: The system performs a “Fuzzy Search” using icontains. SQL Example: SELECT * FROM api_product WHERE name ILIKE ‘%vintage camera%’; Optimization: The database utilizes indexes on the name and category fields to return results in milliseconds.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Serialization (Data Formatting)</td>
+<td>Transformation: The raw database rows (Objects) are passed to the ProductSerializer. Enhancement: The Serializer calculates the discount_percentage on-the-fly and fetches the full Cloudinary CDN URL for the product images. Output: The data is converted into a clean JSON Array.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>The Response (Delivery)</td>
+<td>Transmission: Django sends a 200 OK status code along with the JSON payload. Rendering: The Next.js frontend receives the data, updates the state, and maps the results into ProductCard components using the Virtual DOM for a flicker-free update.</td>
+</tr>
+</tbody>
+</table>
+<h2 class="code-line" data-line-start=270 data-line-end=271 ><a id="_Data_Integrity_Summary_270"></a>️ Data Integrity Summary</h2>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Feature</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Atomic Operations</td>
+<td>Ensures that partial data is never saved if an error occurs mid-request.</td>
+</tr>
+<tr>
+<td>Sanitization</td>
+<td>Django ORM automatically prevents SQL Injection by parameterizing all search queries.</td>
+</tr>
+<tr>
+<td>Image Optimization</td>
+<td>Instead of sending heavy raw images, the API only sends lightweight URL strings, which the browser loads lazily.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 class="code-line" data-line-start=280 data-line-end=281 ><a id="11_Security_and_Error_Handling_280"></a>11. Security and Error Handling</h2>
+<ul>
+<li class="has-line-data" data-line-start="282" data-line-end="283">Atomic transactions</li>
+<li class="has-line-data" data-line-start="283" data-line-end="284">Backend price validation</li>
+<li class="has-line-data" data-line-start="284" data-line-end="285">Unique slug generation</li>
+<li class="has-line-data" data-line-start="285" data-line-end="287">Strong password validation</li>
+</ul>
+<hr>
+<h2 class="code-line" data-line-start=289 data-line-end=290 ><a id="12_Deployment_Guide_289"></a>12. Deployment Guide</h2>
+<ul>
+<li class="has-line-data" data-line-start="291" data-line-end="292">Platform: AWS / DigitalOcean / Render\</li>
+<li class="has-line-data" data-line-start="292" data-line-end="293">Nginx + Gunicorn\</li>
+<li class="has-line-data" data-line-start="293" data-line-end="295">Frontend: Vercel</li>
+</ul>
+<h3 class="code-line" data-line-start=295 data-line-end=296 ><a id="Checklist_295"></a>Checklist</h3>
+<ul>
+<li class="has-line-data" data-line-start="297" data-line-end="298">DEBUG=False\</li>
+<li class="has-line-data" data-line-start="298" data-line-end="299">Configure ALLOWED_HOSTS\</li>
+<li class="has-line-data" data-line-start="299" data-line-end="300">Use PostgreSQL\</li>
+<li class="has-line-data" data-line-start="300" data-line-end="302">Enable SSL</li>
+</ul>
+<hr>
+<h2 class="code-line" data-line-start=303 data-line-end=304 ><a id="13__Future_Roadmap_303"></a>13  Future Roadmap</h2>
+<p class="has-line-data" data-line-start="304" data-line-end="307">ElasticSearch: For deeper full-text search capabilities.<br>
+Redis: Caching layer for trending products.<br>
+Mobile App: The API is pre-configured to support React Native or Flutter</p>
+<hr>
+<h2 class="code-line" data-line-start=310 data-line-end=311 ><a id="Summary_310"></a>Summary</h2>
+<p class="has-line-data" data-line-start="312" data-line-end="313">Built for scalability, security, and production use with: - Next.js. This platform represents a robust, enterprise-grade solution for modern marketplaces. By separating the data layer from the presentation layer, Diaspora Black is positioned to scale to millions of users while maintaining high speed and structural integrity</p>
+<ul>
+<li class="has-line-data" data-line-start="313" data-line-end="314">Django REST Framework</li>
+<li class="has-line-data" data-line-start="314" data-line-end="315">Paystack</li>
+<li class="has-line-data" data-line-start="315" data-line-end="316">Cloudinary</li>
+</ul>
