@@ -31,8 +31,13 @@ const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signu
 
 
   // 3. Logic: If no token, redirect protected routes to login
-//console.log('token:',token)
+//console.log('token:',token);
   if (!token) {
+    //console.log('!!token:',token);
+    if (isAuthRoute) {
+       //console.log('!!helo:',token);
+        return NextResponse.next();
+      }
     const isAnyProtectedRoute = isSellerRoute || isCustomerRoute || isSharedProtectedRoute || isOnboardingRoute;
     if (isAnyProtectedRoute) {
       // Determine which login page to show based on the route type
@@ -88,7 +93,7 @@ const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signu
     // --- AUTH LOGIC ---
     // Prevent logged-in users from seeing Login/Register pages
     if (isAuthRoute) {
-      const redirectPath = userRole === 'seller' ? (hasProfile ? 'seller/dashboard' : '/onboarding') : '/';
+      const redirectPath = userRole === 'seller' ? (hasProfile ? '/seller/dashboard' : '/onboarding') : '/';
       return NextResponse.redirect(new URL(redirectPath, request.url));
     }
   }

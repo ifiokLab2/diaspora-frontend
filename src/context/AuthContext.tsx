@@ -66,6 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setCookie('accessToken', access, cookieOptions);
       setCookie('refreshToken', refresh, cookieOptions);
       setCookie('userRole', role, cookieOptions);
+      router.refresh();
       
       // 2. Profile Status (Used by Middleware)
       const hasProfileStatus = userData.hasShopProfile ? 'true' : 'false';
@@ -94,7 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       // Ensure the server components see the new cookies
-      router.refresh(); 
+      //router.refresh(); 
       
     } catch (error: any) {
       throw error.response?.data || error.message; 
