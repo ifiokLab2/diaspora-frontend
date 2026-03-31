@@ -11,8 +11,8 @@ export default function middleware(request: NextRequest) {
 
   // 2. Define Route Categories
   const isSellerRoute = pathname.startsWith('/seller/dashboard') || 
-                        pathname.startsWith('/inventory') || 
-                        pathname.startsWith('/seller');
+                        pathname.startsWith('/inventory');
+                        
                         
   const isOnboardingRoute = pathname.startsWith('/onboarding');
 
