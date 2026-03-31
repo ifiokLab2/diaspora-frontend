@@ -34,6 +34,7 @@ interface AnalyticsData {
 export default function AnalyticsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAddProductModal, setShowAddProductModal] = useState(false)
+   const [editingProduct, setEditingProduct] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [data, setData] = useState<AnalyticsData | null>(null)
 
@@ -51,15 +52,13 @@ export default function AnalyticsPage() {
     fetchAnalytics()
   }, [])
 
-  const handleAddProduct = async (product: any) => {
-    try {
-      await api.post('/products/', product)
-      toast.success('Product added successfully')
-      setShowAddProductModal(false)
-      //fetchDashboardData(period)
-    } catch (error) {
-      toast.error('Failed to add product')
-    }
+ const handleAddProductSuccess = () => {
+    handleCloseModal()
+    
+  }
+  const handleCloseModal = () => {
+    setShowAddProductModal(false)
+    setEditingProduct(null)
   }
 
   if (isLoading || !data) return (
@@ -77,9 +76,11 @@ export default function AnalyticsPage() {
       />
       <AddProductModal
         isOpen={showAddProductModal}
-        onClose={() => setShowAddProductModal(false)}
-        onSubmit={handleAddProduct}
+        onClose={handleCloseModal}
+        onSubmit={handleAddProductSuccess} 
+        editData={editingProduct} // Pass the product data here
       />
+      
 
       {/* Main Content */}
       <main className="ml-0 md:ml-44 mt-20 pb-8 flex-1 overflow-y-auto">

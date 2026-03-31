@@ -89,24 +89,15 @@ export default function OrdersPage() {
   }, [searchQuery])
 
   
+   const handleAddProductSuccess = () => {
+    handleCloseModal()
+    
+  }
   const handleCloseModal = () => {
     setShowAddProductModal(false)
     setEditingProduct(null)
   }
-  const handleAddProductSuccess = () => {
-    handleCloseModal()
-    //fetchProducts()
-  }
-   const handleAddProduct = async (product: any) => {
-    try {
-      await api.post('/products/', product)
-      toast.success('Product added successfully')
-      setShowAddProductModal(false)
-      //fetchDashboardData(period)
-    } catch (error) {
-      toast.error('Failed to add product')
-    }
-  }
+   
 
 
   const filteredOrders = orderItems.filter(item =>

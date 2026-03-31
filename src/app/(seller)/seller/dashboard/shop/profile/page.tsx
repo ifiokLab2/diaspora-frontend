@@ -35,6 +35,7 @@ export default function ShopProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
     const [showAddProductModal, setShowAddProductModal] = useState(false)
+    const [editingProduct, setEditingProduct] = useState<any>(null)
 
   
   // Dropdown Data
@@ -144,25 +145,30 @@ export default function ShopProfilePage() {
       </div>
     )
   }
-   const handleAddProduct = async (product: any) => {
-    try {
-      await api.post('/products/', product)
-      toast.success('Product added successfully')
-      setShowAddProductModal(false)
-      //fetchDashboardData(period)
-    } catch (error) {
-      toast.error('Failed to add product')
-    }
+  
+  const handleAddProductSuccess = () => {
+    handleCloseModal()
+    
   }
+  const handleCloseModal = () => {
+    setShowAddProductModal(false)
+    setEditingProduct(null)
+  }
+
 
   return (
     <div className="bg-background h-screen flex flex-col overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+       <DashboardHeader 
+        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        onAddProduct={() => setShowAddProductModal(true)}
+      />
+     
       <AddProductModal
         isOpen={showAddProductModal}
-        onClose={() => setShowAddProductModal(false)}
-        onSubmit={handleAddProduct}
+        onClose={handleCloseModal}
+        onSubmit={handleAddProductSuccess} 
+        editData={editingProduct} // Pass the product data here
       />
 
       <main className="ml-0 md:ml-44 mt-20 pb-8 flex-1 overflow-y-auto">

@@ -28,6 +28,7 @@ export default function CreateShopProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAddProductModal, setShowAddProductModal] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<any>(null)
   const [formData, setFormData] = useState<ShopFormData>({
     shopName: '',
     shopDescription: '',
@@ -42,15 +43,13 @@ export default function CreateShopProfilePage() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-   const handleAddProduct = async (product: any) => {
-    try {
-      await api.post('/products/', product)
-      toast.success('Product added successfully')
-      setShowAddProductModal(false)
-      //fetchDashboardData(period)
-    } catch (error) {
-      toast.error('Failed to add product')
-    }
+   const handleAddProductSuccess = () => {
+    handleCloseModal()
+    
+  }
+  const handleCloseModal = () => {
+    setShowAddProductModal(false)
+    setEditingProduct(null)
   }
 
   const validateForm = (): boolean => {
@@ -117,10 +116,11 @@ export default function CreateShopProfilePage() {
         onAddProduct={() => setShowAddProductModal(true)}
       />
       
-      <AddProductModal
+       <AddProductModal
         isOpen={showAddProductModal}
-        onClose={() => setShowAddProductModal(false)}
-        onSubmit={handleAddProduct}
+        onClose={handleCloseModal}
+        onSubmit={handleAddProductSuccess} 
+        editData={editingProduct} // Pass the product data here
       />
 
       {/* Main Content */}

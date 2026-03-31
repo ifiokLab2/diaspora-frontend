@@ -20,6 +20,7 @@ import { toast } from 'react-hot-toast'
 export default function CreateListingPage(){
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAddProductModal, setShowAddProductModal] = useState(false)
+   const [editingProduct, setEditingProduct] = useState<any>(null)
   const router = useRouter()
 
   // Data Fetching State
@@ -110,15 +111,13 @@ export default function CreateListingPage(){
     }
   }
 
-  const handleAddProduct = async (product: any) => {
-    try {
-      await api.post('/products/', product)
-      toast.success('Product added successfully')
-      setShowAddProductModal(false)
+   const handleAddProductSuccess = () => {
+    handleCloseModal()
     
-    } catch (error) {
-      toast.error('Failed to add product')
-    }
+  }
+  const handleCloseModal = () => {
+    setShowAddProductModal(false)
+    setEditingProduct(null)
   }
 
 
@@ -131,8 +130,9 @@ export default function CreateListingPage(){
       />
       <AddProductModal
         isOpen={showAddProductModal}
-        onClose={() => setShowAddProductModal(false)}
-        onSubmit={handleAddProduct}
+        onClose={handleCloseModal}
+        onSubmit={handleAddProductSuccess} 
+        editData={editingProduct} // Pass the product data here
       />
 
       {/* Main Content */}

@@ -19,7 +19,8 @@ export default function PayoutsPage() {
   const [showAddMethodModal, setShowAddMethodModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-   const [showAddProductModal, setShowAddProductModal] = useState(false)
+  const [showAddProductModal, setShowAddProductModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<any>(null)
   
   // Real Data State
   const [data, setData] = useState<any>({ 
@@ -56,15 +57,15 @@ export default function PayoutsPage() {
   useEffect(() => {
     fetchData()
   }, [])
-   const handleAddProduct = async (product: any) => {
-    try {
-      await api.post('/products/', product)
-      toast.success('Product added successfully')
-      setShowAddProductModal(false)
-      //fetchDashboardData(period)
-    } catch (error) {
-      toast.error('Failed to add product')
-    }
+
+
+   const handleAddProductSuccess = () => {
+    handleCloseModal()
+    
+  }
+  const handleCloseModal = () => {
+    setShowAddProductModal(false)
+    setEditingProduct(null)
   }
 
   const handleRequestWithdraw = async () => {
@@ -110,18 +111,24 @@ export default function PayoutsPage() {
   return (
     <div className="bg-background h-screen flex flex-col overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+      <DashboardHeader 
+        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        onAddProduct={() => setShowAddProductModal(true)}
+      />
       
       <AddPaymentMethodModal 
         isOpen={showAddMethodModal} 
         onClose={() => setShowAddMethodModal(false)} 
         onSuccess={fetchData} 
       />
-       <AddProductModal
+       
+      <AddProductModal
         isOpen={showAddProductModal}
-        onClose={() => setShowAddProductModal(false)}
-        onSubmit={handleAddProduct}
+        onClose={handleCloseModal}
+        onSubmit={handleAddProductSuccess} 
+        editData={editingProduct} // Pass the product data here
       />
+
 
       <main className="ml-0 md:ml-44 mt-20 pb-8 flex-1 overflow-y-auto">
         <div className="px-4 sm:px-6 md:px-8">

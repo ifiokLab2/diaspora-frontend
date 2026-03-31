@@ -130,7 +130,7 @@ export default function DashboardListingsPage() {
               <h1 className="text-3xl font-black tracking-tight">Listings Hub</h1>
               <p className="text-muted-foreground text-sm">Monitor your listings and performance metrics.</p>
             </div>
-            <Button onClick={() => router.push('/dashboard/listings/create')} className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium gap-2 text-xs md:text-sm px-2 md:px-4">
+            <Button onClick={() => router.push('/seller/dashboard/listings/create')} className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium gap-2 text-xs md:text-sm px-2 md:px-4">
               <Plus className="w-4 h-4 mr-2" /> Post New Listing
             </Button>
           </div>
