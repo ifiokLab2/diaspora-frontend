@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 
 // Base URL for the Django Backend
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
 
 const api = axios.create({
   baseURL: BASE_URL,

@@ -1,11 +1,10 @@
 "use client"
-import { useState } from "react";
-import { Eye, EyeOff,UserPlus, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext'; // Import AuthContext
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { setCookie } from 'cookies-next';
 
 interface FloatingInputProps {
   id: string;
@@ -14,22 +13,20 @@ interface FloatingInputProps {
   value: string;
   onChange: (val: string) => void;
   endIcon?: React.ReactNode;
+  required?: boolean;
 }
 
-const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon }: FloatingInputProps) => {
+const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon, required }: FloatingInputProps) => {
   const [focused, setFocused] = useState(false);
   const isActive = focused || value.length > 0;
 
   return (
-    <div
-      className={`relative rounded-lg border transition-colors ${
-        focused ? "border-foreground" : "border-input"
-      }`}
-    >
+    <div className={`relative rounded-lg border transition-colors ${focused ? "border-foreground" : "border-input"}`}>
       <input
         id={id}
         type={type}
         value={value}
+        required={required}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
@@ -39,16 +36,12 @@ const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon }: F
       <label
         htmlFor={id}
         className={`pointer-events-none absolute left-3 bg-background px-1 transition-all duration-200 ${
-          isActive
-            ? "-top-2.5 text-xs text-muted-foreground"
-            : "top-2 text-sm text-muted-foreground"
+          isActive ? "-top-2.5 text-xs text-muted-foreground" : "top-2 text-sm text-muted-foreground"
         }`}
       >
         {label}
       </label>
-      {endIcon && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">{endIcon}</div>
-      )}
+      {endIcon && <div className="absolute right-3 top-1/2 -translate-y-1/2">{endIcon}</div>}
     </div>
   );
 };
@@ -68,6 +61,26 @@ const SellerSignup =  () => {
   const router = useRouter();
   const { login } = useAuth(); // Destructure login
 
+  // --- Real-time Password Strength Logic ---
+  const strength = useMemo(() => {
+    let score = 0;
+    if (!password) return { score: 0, label: "", color: "bg-gray-200" };
+    if (password.length >= 6) score++;
+    if (password.length >= 10) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    const mapping = [
+      { label: "Very Weak", color: "bg-red-500" },
+      { label: "Weak", color: "bg-orange-500" },
+      { label: "Fair", color: "bg-yellow-500" },
+      { label: "Good", color: "bg-blue-500" },
+      { label: "Strong", color: "bg-green-500" },
+    ];
+    return { score, ...mapping[score - 1] };
+  }, [password]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -78,6 +91,11 @@ const SellerSignup =  () => {
       setPasswordMismatch(true);
       setError("Passwords do not match.");
       
+      return;
+    }
+    // Validations
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
       return;
     }
 
@@ -95,11 +113,7 @@ const SellerSignup =  () => {
       setSuccess(true);
       await login({ email, password }, 'seller');
       
-      // Redirect to login after a brief success message
-      /*setTimeout( async () => {
-        //router.push('/login');
-        await login({ email, password }, 'customer');
-      }, 2000);*/
+      
 
     } catch (err: any) {
       //const msg = err.response?.data?.detail || "Registration failed. Please check your details.";
@@ -121,11 +135,13 @@ const SellerSignup =  () => {
             <span>
             {error}
             {!passwordMismatch && (
-               <Link href="/login/customer/" className="ml-2 text-blue-500 underline">
-                       login
-              </Link>
-
-            )}
+            <Link 
+              href={error.endsWith("seller") ? "/login/seller/" : "/login/customer/"} 
+              className="ml-2 text-blue-500 font-semibold underline not-italic"
+            >
+              Login here
+            </Link>
+          )}
            
             </span>
           </div>
@@ -138,42 +154,61 @@ const SellerSignup =  () => {
         )}
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <FloatingInput id="email" label="Email" type="email" value={email} onChange={setEmail} />
-          <FloatingInput id="firstName" label="First name" value={firstName} onChange={setFirstName} />
-          <FloatingInput id="lastName" label="Last name" value={lastName} onChange={setLastName} />
-          <FloatingInput
-            id="password"
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={setPassword}
-            endIcon={
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-muted-foreground hover:text-foreground">
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            }
-          />
+          <FloatingInput id="email" label="Email" type="email" value={email} onChange={setEmail} required />
+          <div className="grid grid-cols-2 gap-4">
+            <FloatingInput id="firstName" label="First name" value={firstName} onChange={setFirstName} required />
+            <FloatingInput id="lastName" label="Last name" value={lastName} onChange={setLastName} required />
+          </div>
+
+          <div className="space-y-1">
+            <FloatingInput
+              id="password"
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={setPassword}
+              required
+              endIcon={
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-muted-foreground">
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              }
+            />
+            {/* Strength Meter UI */}
+            {password.length > 0 && (
+              <div className="px-1 pt-1">
+                <div className="flex gap-1 h-1">
+                  {[1, 2, 3, 4, 5].map((step) => (
+                    <div 
+                      key={step} 
+                      className={`h-full w-full rounded-full transition-colors duration-500 ${
+                        step <= strength.score ? strength.color : "bg-gray-200"
+                      }`} 
+                    />
+                  ))}
+                </div>
+                <p className="text-[10px] mt-1 font-medium text-muted-foreground uppercase tracking-wider">
+                  Strength: {strength.label}
+                </p>
+              </div>
+            )}
+          </div>
+
           <FloatingInput
             id="confirmPassword"
             label="Confirm Password"
             type={showConfirmPassword ? "text" : "password"}
             value={confirmPassword}
             onChange={setConfirmPassword}
+            required
             endIcon={
-              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="text-muted-foreground hover:text-foreground">
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="text-muted-foreground">
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             }
           />
 
-          <div className="flex justify-end">
-            <Link 
-              href="/forgot-password" 
-              className="text-xs font-semibold text-brand hover:text-brand-dark transition-colors hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          
 
           <button
             type="submit"

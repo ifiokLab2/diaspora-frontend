@@ -96,16 +96,19 @@ export const useCartStore = create<CartState>()(
           await get().fetchCart();
         } catch (error) {
           console.error("Update Quantity Error:", error);
+          set({ isLoading: false }); // Stop loading
         }
       },
 
       // DELETE: Removes a specific item record (Matches RemoveFromCartView)
       removeItem: async (productId: number) => {
+        set({ isLoading: true }); // Start loading
         try {
           await api.delete(`/cart/remove/${productId}/`);
           await get().fetchCart();
         } catch (error) {
           console.error("Remove Item Error:", error);
+          set({ isLoading: false }); // Stop loading
         }
       },
 

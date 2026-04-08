@@ -81,8 +81,9 @@ const menuItems = () => {
     
     router.push(`${targetPath}?${queryString}`);
     
-    setSearchModal(false);
-    //setSuggestions([]);
+    //setSearchModal(false);
+    setSearchModal(false); // Close mobile modal
+   
   };
 
   return (
@@ -182,7 +183,7 @@ const menuItems = () => {
               </div>
 
               {/* Main Content */}
-              <div className="max-w-4xl mx-auto px-6 py-3">
+              <form onSubmit = {handleFullSearch} className="max-w-4xl mx-auto px-6 py-3">
                 {/* Subtitle */}
                 <p className="text-gray-700 text-sm font-medium mb-8">
                   Search for products and brands here.
@@ -199,7 +200,8 @@ const menuItems = () => {
                   />
 
                   <button
-                    onClick={handleFullSearch}
+                    
+                    type = "submit"
                     className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded flex items-center justify-center transition-colors"
                     aria-label="Search products"
                   >
@@ -224,14 +226,14 @@ const menuItems = () => {
                     className="text-sm min-w-0 w-32 px-4 py-2 border border-gray-300 rounded text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                   />
                   <button
-                   onClick={handleFullSearch}
+                    type = "submit"
                     className=" bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded flex items-center justify-center transition-colors"
                     aria-label="Search services"
                   >
                     <Search className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
+              </form>
           </div>
    </>
   );

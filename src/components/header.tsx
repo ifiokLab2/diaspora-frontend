@@ -207,6 +207,9 @@ export default function Header() {
     e.preventDefault();
 
     const params = new URLSearchParams();
+    setSearchModal(false); // Close mobile modal
+    setSuggestions([]);    // Close desktop suggestions
+    setShowSuggestions(false); // Hide the suggestion box
 
     // Attach all three if they exist
     if (productsSearch.trim()) params.set("search", productsSearch.trim());
@@ -277,7 +280,9 @@ export default function Header() {
             <span className="md:hidden font-bold text-sm">DiasporaBlacks</span>
           </Link>
         </div>
+
         {/* Side Bar */}
+
         
           <div onClick = {toggleSideBarModal} className={`transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0":"-translate-x-full"} md:hidden  fixed bg-black/20 top-0 bottom-0 right-0 left-0`}>
           <div onClick = {(e)=>{e.stopPropagation()}} className="overflow-y-scroll h-full w-[80%] bg-white">
@@ -326,6 +331,17 @@ export default function Header() {
                 </span>
                  
               </Link>
+
+              {isAuthenticated ? (
+                 <button onClick={logout} className="hover:text-primary-yellow cursor-pointer flex items-center justify-center my-[10px]">
+                   <span>Logout</span>
+                 </button>
+                 ):(
+                  <Link href = "/login/customer/" className="hover:text-primary-yellow cursor-pointer flex items-center justify-center my-[10px]">
+                   <span>Login</span>
+                 </Link>
+                 )}
+
             </div>
 
              <div className = "flex flex-col px-4 py-4">
@@ -393,10 +409,10 @@ export default function Header() {
                 </span>
                  
               </Link>
-               <Link href = "/products/category/yarm-tubers/" className = "hover:text-primary-yellow  flex items-center mb-1">
+               <Link href = "/products/category/yam-tubers/" className = "hover:text-primary-yellow  flex items-center mb-1">
                <Grid2x2 className="h-3.5 w-3.5 mr-2" />
                 <span className = "text-[.75rem]">
-                  Yarm & Tubers
+                  Yam & Tubers
                 </span>
                  
               </Link>
@@ -494,7 +510,7 @@ export default function Header() {
 
             </div>
             <div className = "flex flex-col px-4 py-4">
-              <Link href = "/" className = "flex items-center justify-between">
+              <Link href = "/contact" className = "flex items-center justify-between">
                 <span className = "text-primary-yellow text-bold">
                   Customer Care
                 </span>
@@ -579,7 +595,7 @@ export default function Header() {
               </div>
 
               {/* Main Content */}
-              <div className="max-w-4xl mx-auto px-6 py-3">
+              <form onSubmit = {handleFullSearch} className="max-w-4xl mx-auto px-6 py-3">
                 {/* Subtitle */}
                 <p className="text-gray-700 text-sm font-medium mb-8">
                   Search for products and brands here.
@@ -596,7 +612,7 @@ export default function Header() {
                   />
 
                   <button
-                    onClick={handleFullSearch}
+                    type = "submit"
                     className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded flex items-center justify-center transition-colors"
                     aria-label="Search products"
                   >
@@ -621,14 +637,14 @@ export default function Header() {
                     className="text-sm min-w-0 w-32 px-4 py-2 border border-gray-300 rounded text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                   />
                   <button
-                   onClick={handleFullSearch}
+                    type = "submit"
                     className=" bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded flex items-center justify-center transition-colors"
                     aria-label="Search services"
                   >
                     <Search className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
+              </form>
           </div>
           {/* Desktop: full user menu */}
           <div tabIndex={0} role="button" onClick = {toggleUserModal} className="relative hidden md:flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors">

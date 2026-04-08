@@ -56,7 +56,7 @@ const CartSummary = () => {
             <div className="min-w-0">
               <p className="text-xs font-medium text-muted-foreground leading-tight">{item.product.name}</p>
               <p className="text-primary-yellow font-bold text-sm mt-1">
-                {item.product.discount_price}
+                {formatCurrency(item.product.discount_price)}
               </p>
               <p className="text-xs text-muted-foreground">Qty:{item.quantity}</p>
             </div>

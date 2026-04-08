@@ -14,9 +14,10 @@ interface FloatingInputProps {
   value: string;
   onChange: (val: string) => void;
   endIcon?: React.ReactNode;
+  required?: boolean; // Add this
 }
 
-const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon }: FloatingInputProps) => {
+const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon,required }: FloatingInputProps) => {
   const [focused, setFocused] = useState(false);
   const isActive = focused || value.length > 0;
 
@@ -30,6 +31,7 @@ const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon }: F
         id={id}
         type={type}
         value={value}
+        required={required}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
@@ -70,6 +72,10 @@ const CustomerLogin =  () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!email || !password) {
+      setError('Please enter both email and password.');
+      return; // Stop the function here
+    }
     setLoading(true);
 
     try {
@@ -112,13 +118,10 @@ const CustomerLogin =  () => {
              
               {accountExist && (
               <>
-              <Link href="/login/seller" className="ml-2 text-blue-500 underline">
-                      seller login
+              <Link href={error.endsWith("seller") ? "/login/seller/" : "/login/customer/"}  className="ml-1 text-blue-500 underline">
+                  Login here
               </Link>
-                {" "}or 
-                 <Link href="/signup/customer/" className="ml-2 text-blue-500 underline">
-                      custoomer signup
-              </Link>
+                
               </>
 
             )}
@@ -129,7 +132,14 @@ const CustomerLogin =  () => {
         )}
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <FloatingInput id="email" label="Email" type="email" value={email} onChange={setEmail} />
+          <FloatingInput 
+            id="email"
+             label="Email" 
+             type="email"
+              value={email} 
+              required 
+              onChange={setEmail}
+             />
           
           <FloatingInput
             id="password"
@@ -137,6 +147,7 @@ const CustomerLogin =  () => {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={setPassword}
+            required
             endIcon={
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-muted-foreground hover:text-foreground">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -175,7 +186,7 @@ const CustomerLogin =  () => {
               Signup
             </Link>
           </p>
-          <p className="text-gray-600">Not a customer? <Link href="/seller/login/" className="text-indigo-600 font-semibold hover:underline">Seller Login</Link></p>
+          <p className="text-gray-600">Not a customer? <Link href="/login/seller" className="text-indigo-600 font-semibold hover:underline">Seller Login</Link></p>
         </form>
       </div>
     </div>

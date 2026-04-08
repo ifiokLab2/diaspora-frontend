@@ -4,21 +4,15 @@ import { SearchSection } from '@/components/listings/SearchSection'
 import { Suspense } from 'react'
 import { Loader2 } from 'lucide-react'
 
-
 export const revalidate = 0;
 
-// The types for searchParams also change slightly to reflect the Promise
 export default async function ListingHomePage(props: {
   searchParams: Promise<{ page?: string; search?: string; category?: string }>
 }) {
-  // 1. UNWRAP the searchParams promise first
   const searchParams = await props.searchParams;
-  
-  // 2. Now you can access the properties safely
   const page = searchParams.page || '1'
   const query = searchParams.search || ''
   const category = searchParams.category || ''
-
 
   // Parallel fetch for speed
   const [listingRes, catRes] = await Promise.all([
@@ -37,7 +31,7 @@ export default async function ListingHomePage(props: {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
-              {query ? `Search results for "${query}"` : 'Marketplace'}
+              {query ? `Results for "${query}"` : 'Marketplace'}
             </h2>
             <p className="text-muted-foreground text-sm">
               {pagination.total_items} items available
@@ -53,5 +47,5 @@ export default async function ListingHomePage(props: {
         </Suspense>
       </div>
     </div>
-  )
+  );
 }

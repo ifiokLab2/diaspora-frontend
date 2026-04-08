@@ -62,7 +62,8 @@ export function AddPaymentMethodModal({ isOpen, onClose, onSuccess }: Props) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Method Selector */}
           <div className="flex gap-2 p-1 bg-secondary/50 rounded-xl mb-4">
-            {['bank', 'bkash', 'nagad'].map((type) => (
+            {['bank',].map((type) => (
+              //'bkash', 'nagad'
               <button
                 key={type}
                 type="button"
@@ -121,6 +122,7 @@ export function AddPaymentMethodModal({ isOpen, onClose, onSuccess }: Props) {
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Routing No.</label>
                   <input
+                  type = "number"
                     className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none transition-all"
                     placeholder="9 Digits"
                     value={formData.routing_number}

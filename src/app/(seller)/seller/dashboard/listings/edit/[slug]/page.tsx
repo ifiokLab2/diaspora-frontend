@@ -29,6 +29,7 @@ export default function EditListingPage() {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAddProductModal, setShowAddProductModal] = useState(false)
+   const [editingProduct, setEditingProduct] = useState<any>(null)
 
   // Data Fetching State
   const [loading, setLoading] = useState(true)
@@ -152,6 +153,14 @@ export default function EditListingPage() {
       setUpdating(false)
     }
   }
+  const handleAddProductSuccess = () => {
+    handleCloseModal()
+    
+  }
+  const handleCloseModal = () => {
+    setShowAddProductModal(false)
+    setEditingProduct(null)
+  }
 
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-accent" /></div>
 
@@ -159,6 +168,12 @@ export default function EditListingPage() {
     <div className="bg-background flex flex-col overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} onAddProduct={() => setShowAddProductModal(true)} />
+      <AddProductModal
+        isOpen={showAddProductModal}
+        onClose={handleCloseModal}
+        onSubmit={handleAddProductSuccess} 
+        editData={editingProduct} // Pass the product data here
+      />
       
       <main className="ml-0 md:ml-44 mt-20 pb-8 flex-1 overflow-y-auto">
         <div className="px-4 sm:px-6 md:px-8 max-w-4xl mx-auto py-10">

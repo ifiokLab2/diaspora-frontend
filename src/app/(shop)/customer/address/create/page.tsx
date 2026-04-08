@@ -5,23 +5,23 @@ import { toast } from "react-hot-toast";
 import api from "@/lib/api";
 import AccountSidebar from "@/components/account-sidebar";
 import { Button } from "@/components/ui/button";
-import { useRouter,useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-
-// --- UI Components with Controlled Logic Fixes ---
+// --- UI Components ---
 
 const FloatingInput = ({
   label,
   name,
   value,
   onChange,
+  required = false,
 }: {
   label: string;
   name: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
 }) => {
-  // Fix: Ensure value is never undefined/null to prevent uncontrolled warning
   const safeValue = value ?? "";
   const hasValue = safeValue.length > 0;
 
@@ -32,6 +32,7 @@ const FloatingInput = ({
         name={name}
         value={safeValue}
         onChange={onChange}
+        required={required}
         placeholder=" "
         className={`peer w-full rounded border bg-transparent px-3 pt-4 pb-2 text-sm text-foreground outline-none transition-colors
           ${hasValue ? "border-primary" : "border-input"}
@@ -39,11 +40,11 @@ const FloatingInput = ({
       />
       <label
         className={`pointer-events-none absolute left-2 -top-2.5 bg-card px-1 text-xs transition-all
-          ${hasValue ? "text-primary" : "text-primary"}
+          text-primary
           peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm peer-placeholder-shown:text-muted-foreground peer-placeholder-shown:bg-transparent
           peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-primary-yellow peer-focus:bg-card`}
       >
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
     </div>
   );
@@ -56,6 +57,7 @@ const FloatingSelect = ({
   onChange,
   options = [],
   disabled = false,
+  required = false,
 }: {
   label: string;
   name: string;
@@ -63,8 +65,8 @@ const FloatingSelect = ({
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options?: { id: string | number; name: string }[];
   disabled?: boolean;
+  required?: boolean;
 }) => {
-  // Fix: Ensure value is never undefined/null for selects
   const safeValue = value ?? "";
   const hasValue = safeValue !== "";
 
@@ -73,12 +75,13 @@ const FloatingSelect = ({
       <label className={`absolute left-2 -top-2.5 bg-card px-1 text-xs z-10 transition-all
         ${hasValue ? "text-primary" : "text-muted-foreground"}`}
       >
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
       <select
         name={name}
         value={safeValue}
         onChange={onChange}
+        required={required}
         disabled={disabled}
         className="w-full rounded border border-input bg-transparent px-3 pt-4 pb-2 text-sm text-foreground outline-none transition-colors focus:border-primary appearance-none cursor-pointer disabled:opacity-50"
       >
@@ -89,7 +92,7 @@ const FloatingSelect = ({
           </option>
         ))}
       </select>
-      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 pt-1">
         <svg className="h-4 w-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -101,7 +104,6 @@ const FloatingSelect = ({
 // --- Main Page Component ---
 
 const AccountCreate = () => {
-  // Initialize with empty strings to ensure components start as "controlled"
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -118,11 +120,20 @@ const AccountCreate = () => {
   const [cities, setCities] = useState<{id: number, name: string}[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-   const router = useRouter();
-   const searchParams = useSearchParams(); // 1. Initialize searchParams
-  
-  // 2. Get the redirect path from the URL
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect');
+
+  // Mapping for user-friendly error messages
+  const fieldLabels: Record<string, string> = {
+    first_name: "First Name",
+    last_name: "Last Name",
+    phone: "Phone Number",
+    address: "Delivery Address",
+    country: "Country",
+    city: "City",
+    gender: "Gender",
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,7 +146,6 @@ const AccountCreate = () => {
         setCountries(geoRes.data.countries ?? []);
 
         if (profileRes.data) {
-          // Explicitly map keys and handle null values from Django
           setFormData({
             first_name: profileRes.data.first_name ?? "",
             last_name: profileRes.data.last_name ?? "",
@@ -147,10 +157,8 @@ const AccountCreate = () => {
             city: profileRes.data.city ?? "",
             gender: profileRes.data.gender ?? "",
           });
-          
         }
       } catch (err) {
-        console.error("Initialization error:", err);
         toast.error("Failed to load profile data");
       } finally {
         setIsFetching(false);
@@ -177,8 +185,6 @@ const AccountCreate = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-
-    // Strict digit-only validation for phone numbers
     if ((name === "phone" || name === "phone_secondary") && !/^\d*$/.test(value)) return;
 
     setFormData((prev) => ({
@@ -190,6 +196,19 @@ const AccountCreate = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Specific Validation Check
+    const requiredFields = ['first_name', 'last_name', 'phone', 'address', 'country', 'city', 'gender'];
+    const missingFields = requiredFields
+        .filter(field => !formData[field as keyof typeof formData])
+        .map(field => fieldLabels[field]);
+
+    if (missingFields.length > 0) {
+      const fieldList = missingFields.join(", ");
+      toast.error(`Please provide: ${fieldList}`);
+      return;
+    }
+
     setLoading(true);
     try {
       await api.patch("/auth/users/me/", formData);
@@ -199,7 +218,6 @@ const AccountCreate = () => {
       } else {
         router.push('/account');
       }
-      //router.push('/account');
     } catch (error: any) {
       toast.error(error.response?.data?.detail || "Update failed");
     } finally {
@@ -209,10 +227,7 @@ const AccountCreate = () => {
 
   if (isFetching) return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-3">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-yellow"></div>
-        <p className="text-sm text-gray-500 italic">Syncing profile...</p>
-      </div>
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-yellow"></div>
     </div>
   );
 
@@ -227,17 +242,17 @@ const AccountCreate = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-2 gap-4">
-              <FloatingInput label="First Name" name="first_name" value={formData.first_name} onChange={handleChange} />
-              <FloatingInput label="Last Name" name="last_name" value={formData.last_name} onChange={handleChange} />
+              <FloatingInput label="First Name" name="first_name" value={formData.first_name} onChange={handleChange} required />
+              <FloatingInput label="Last Name" name="last_name" value={formData.last_name} onChange={handleChange} required />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FloatingInput label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
+              <FloatingInput label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} required />
               <FloatingInput label="Additional Phone Number" name="phone_secondary" value={formData.phone_secondary} onChange={handleChange} />
             </div>
 
-            <FloatingInput label="Delivery Address" name="address" value={formData.address} onChange={handleChange} />
-            <FloatingInput label="Additional Information" name="notes" value={formData.notes} onChange={handleChange} />
+            <FloatingInput label="Delivery Address" name="address" value={formData.address} onChange={handleChange} required />
+            <FloatingInput label="Additional Information (Optional)" name="notes" value={formData.notes} onChange={handleChange} />
 
             <div className="grid grid-cols-2 gap-4">
               <FloatingSelect 
@@ -246,6 +261,7 @@ const AccountCreate = () => {
                 value={formData.country} 
                 onChange={handleChange} 
                 options={countries} 
+                required 
               />
               <FloatingSelect 
                 label="City" 
@@ -254,6 +270,7 @@ const AccountCreate = () => {
                 onChange={handleChange} 
                 options={cities} 
                 disabled={!formData.country}
+                required 
               />
             </div>
 
@@ -264,6 +281,7 @@ const AccountCreate = () => {
                 value={formData.gender} 
                 onChange={handleChange} 
                 options={[{id: "Male", name: "Male"}, {id: "Female", name: "Female"}]} 
+                required
               />
             </div>
 

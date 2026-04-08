@@ -52,8 +52,8 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
-   const [searchQuery, setSearchQuery] = useState('')
-   const PAGE_SIZE = 5 // Match this with your Django REST_FRAMEWORK settings
+  const [searchQuery, setSearchQuery] = useState('')
+  const PAGE_SIZE = 5 // Match this with your Django REST_FRAMEWORK settings
 
   const fetchProducts = async (page: number) => {
     setLoading(true)
@@ -249,8 +249,10 @@ export default function ProductsPage() {
                                 </div>
                               )}
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground truncate max-w-[150px] lg:max-w-[200px]">
+                                {product.name}
+                              </p>
                               <p className="text-[10px] font-mono text-muted-foreground">ID: {product.id}</p>
                             </div>
                           </div>

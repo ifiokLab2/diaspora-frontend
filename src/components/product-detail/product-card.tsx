@@ -1,17 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Star, Heart, Check } from "lucide-react";
+import { ShoppingCart, Star, Heart, Check, Loader2 } from "lucide-react"; // Added Loader2
 import Image from "next/image";
 import { useCartStore } from '@/store/useCartStore';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast'; // Import toast
-import api from '@/lib/api'; // Ensure you import your axios instance
-import { getImageUrl, formatCurrency, getDistanceInMiles } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import api from '@/lib/api';
+import { getImageUrl, formatCurrency } from '@/lib/utils';
 
 const ProductCard = ({ product }: any) => {
- // const { addItem, loading: cartLoading } = useCartStore();
   const { addItem, isLoading: cartLoading } = useCartStore();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -20,7 +19,6 @@ const ProductCard = ({ product }: any) => {
   const [isAdded, setIsAdded] = useState(false);
   const [selectedImage, setSelectedImage] = useState(product.main_image);
   
-  // --- New State for Saved Items ---
   const [isSaved, setIsSaved] = useState(product.is_saved || false);
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -38,12 +36,10 @@ const ProductCard = ({ product }: any) => {
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 2000);
     } catch (error) {
-      //alert("Could not add item to cart.");
       toast.error('Could not add product to cart.');
     }
   };
 
-  // --- New Function: Toggle Save ---
   const handleToggleSave = async () => {
     if (!isAuthenticated) {
       router.push(`/login/customer?callbackUrl=/product-detail/${product.slug}`);
@@ -52,9 +48,8 @@ const ProductCard = ({ product }: any) => {
 
     setSaveLoading(true);
     try {
-      // Hits your Django endpoint: /api/products/saved/toggle/<id>/
       const response = await api.post(`/products/saved/toggle/${product.id}/`);
-      setIsSaved(response.data.saved); // Backend should return { "saved": true/false }
+      setIsSaved(response.data.saved);
       toast.success(response.data.message);
     } catch (error) {
       console.error("Error saving item:", error);
@@ -76,8 +71,7 @@ const ProductCard = ({ product }: any) => {
                 alt={product.name}
                 fill
                 className="object-contain p-2 transition-all duration-300"
-                priority={true}                 
-                fetchPriority="high"
+                priority={true}                  
                 sizes="(max-width: 768px) 100vw, 320px"
               />
             </div>
@@ -91,7 +85,7 @@ const ProductCard = ({ product }: any) => {
                     className={`relative w-16 h-16 shrink-0 rounded-md border-2 overflow-hidden transition-all 
                       ${selectedImage === (img.image || img) ? 'border-yellow-500 ring-2 ring-yellow-100' : 'border-transparent'}`}
                   >
-                    <Image src={getImageUrl(img.image || img)} alt="" fill className="object-cover" sizes="64px"  loading="lazy" />
+                    <Image src={getImageUrl(img.image || img)} alt="" fill className="object-cover" sizes="64px" loading="lazy" />
                   </button>
                 ))}
               </div>
@@ -118,13 +112,17 @@ const ProductCard = ({ product }: any) => {
               <button 
                 onClick={handleToggleSave}
                 disabled={saveLoading}
-                className={`p-2 rounded-full transition-all hover:bg-gray-100 ${saveLoading ? 'opacity-50' : ''}`}
+                className={`p-2 rounded-full transition-all hover:bg-gray-100 flex items-center justify-center min-w-[40px] min-h-[40px] ${saveLoading ? 'opacity-70' : ''}`}
               >
-                <Heart 
-                  className={`cursor-pointer w-6 h-6 transition-colors ${
-                    isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"
-                  }`} 
-                />
+                {saveLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-yellow-500" />
+                ) : (
+                  <Heart 
+                    className={`cursor-pointer w-6 h-6 transition-colors ${
+                      isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                    }`} 
+                  />
+                )}
               </button>
             </div>
 
@@ -137,9 +135,16 @@ const ProductCard = ({ product }: any) => {
                 onClick={handleAddToCart}
                 disabled={cartLoading || isAdded}
                 className={`cursor-pointer mt-6 w-full flex items-center justify-center gap-3 font-bold text-sm tracking-wider py-4 rounded-md transition-all 
-                  ${isAdded ? 'bg-green-600 text-white' : 'bg-yellow-500 text-black hover:opacity-90'}`}
+                  ${isAdded ? 'bg-green-600 text-white' : 'bg-yellow-500 text-black hover:opacity-90'}
+                  ${cartLoading ? 'opacity-80' : ''}`}
               >
-                {isAdded ? <><Check className="w-5 h-5" /> ADDED TO Cart</> : <><ShoppingCart className="w-5 h-5" /> ADD TO CART</>}
+                {cartLoading ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> ADDING...</>
+                ) : isAdded ? (
+                  <><Check className="w-5 h-5" /> ADDED TO CART</>
+                ) : (
+                  <><ShoppingCart className="w-5 h-5" /> ADD TO CART</>
+                )}
               </button>
             </div>
           </div>

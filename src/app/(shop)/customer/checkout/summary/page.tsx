@@ -6,6 +6,7 @@ import CheckoutSection from "@/components/checkout-section";
 import CartSummary from "@/components/summary/cart-summary";
 import { useCartStore } from "@/store/useCartStore";
 import api from "@/lib/api";
+import { getImageUrl, formatCurrency, getDistanceInMiles } from '@/lib/utils';
 import { toast } from "react-hot-toast";
 import { Loader2, ShieldCheck, CreditCard } from "lucide-react";
 import Link from "next/link";
@@ -27,13 +28,14 @@ const CheckoutSummary = () => {
   const { items, totalPrice } = useCartStore();
   
   const [profile, setProfile] = useState<any>(null);
-  
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [deliveryMethod, setDeliveryMethod] = useState("door");
+  
+  // 1. ADD STATE FOR PAYMENT METHOD
+  const [paymentMethod, setPaymentMethod] = useState(""); 
 
   useEffect(() => {
-    // Guard: If cart is empty, redirect back to cart
     if (items.length === 0) {
       router.push("/cart");
       return;
@@ -42,16 +44,14 @@ const CheckoutSummary = () => {
     const fetchProfile = async () => {
       try {
         const res = await api.get("/auth/users/me/");
-        const profile = res.data;
+        const profileData = res.data;
 
-        // Logic: If address or city is missing, they need to fill the profile
-        if (!profile?.address || !profile?.city || !profile?.phone) {
-          //toast.info("Please complete your delivery profile first");
+        if (!profileData?.address || !profileData?.city || !profileData?.phone) {
           toast.error("Please complete your delivery profile first");
           router.push("/customer/checkout/address?callbackUrl=/customer/checkout/summary/");
           return;
         }
-        setProfile(res.data);
+        setProfile(profileData);
       } catch (err) {
         toast.error("Please log in to continue");
         router.push("/login/customer?callbackUrl=/customer/checkout/summary/");
@@ -64,23 +64,27 @@ const CheckoutSummary = () => {
   }, [items, router]);
 
   const handlePlaceOrder = async () => {
+    // 2. VALIDATION CHECK
+    if (!paymentMethod) {
+      toast.error("Please select a payment method to proceed");
+      return;
+    }
+
     setLoading(true);
     try {
-      // Prepare payload for the OrderCreateView APIView
       const orderData = {
         items: items.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity,
         })),
-        total_amount: totalPrice, // Matches 'total_amount' in your Django Model
+        total_amount: totalPrice,
         delivery_method: deliveryMethod,
-        shipping_address: `${profile?.address}, ${profile?.city_name}, ${profile?.country_name }`,
+        payment_method: paymentMethod, // Include in payload
+        shipping_address: `${profile?.address}, ${profile?.city_name}, ${profile?.country_name}`,
       };
 
-      // 1. Post to Django APIView
       const res = await api.post("/orders/", orderData);
       
-      // 2. Redirect to Stripe Checkout URL
       if (res.data.checkout_url) {
         toast.loading("Redirecting to secure payment...");
         window.location.href = res.data.checkout_url;
@@ -89,7 +93,7 @@ const CheckoutSummary = () => {
       }
     } catch (err: any) {
       console.error("Checkout error:", err);
-      toast.error(err.response?.data?.error || "Failed to initialize payment. Please try again.");
+      toast.error(err.response?.data?.error || "Failed to initialize payment.");
       setLoading(false);
     }
   };
@@ -101,6 +105,8 @@ const CheckoutSummary = () => {
       </div>
     );
   }
+
+ 
   return (
     <div className="min-h-screen bg-background mt-29">
       <div className="max-w-full py-2 px-[6%]">
@@ -151,12 +157,21 @@ const CheckoutSummary = () => {
             </CheckoutSection>
 
             {/* 3. Payment Method */}
+           
             <CheckoutSection number={3} title="PAYMENT METHOD">
               <div className="text-sm text-card-foreground">
                 <p className="font-bold mb-3">Pay with Cards, Bank Transfer or USSD</p>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="payment" className="accent-primary w-4 h-4" />
-                  <span>Card</span>
+                {/* 3. UPDATED INPUT WITH STATE LINKING */}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="payment" 
+                   
+                    checked={paymentMethod === "stripe"}
+                    onChange={(e) => setPaymentMethod("stripe")}
+                    className="accent-primary w-4 h-4" 
+                  />
+                  <span className="font-medium">Card / Secure Online Payment</span>
                 </label>
               </div>
             </CheckoutSection>
@@ -194,23 +209,26 @@ const CheckoutSummary = () => {
           {/* Cart Summary Sidebar */}
           <div className="w-full lg:w-[280px] shrink-0 lg:sticky lg:top-6 ">
             <CartSummary />
-            <div className="bg-muted/10 border-t">
+            
+
+
+              <div className="mt-4 bg-muted/10 border-t">
                 <button
                   onClick={handlePlaceOrder}
                   disabled={loading}
-                  className="w-full bg-primary-yellow text-black font-black py-4 rounded-lg shadow-md hover:bg-yellow-500 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-base"
+                  className="w-full bg-primary-yellow text-black font-black py-4 rounded-lg shadow-md hover:bg-yellow-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="animate-spin" size={20} />
-                      RESERVING ORDER...
+                      PROCESSING...
                     </>
                   ) : (
                     `PAY £${totalPrice.toFixed(2)}`
                   )}
                 </button>
                 <p className="text-[10px] text-center mt-3 text-muted-foreground">
-                  You will be redirected to Stripe to complete your purchase safely.
+                  Secure Checkout via Stripe.
                 </p>
               </div>
           </div>

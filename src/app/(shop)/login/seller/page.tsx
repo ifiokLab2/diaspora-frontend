@@ -14,9 +14,10 @@ interface FloatingInputProps {
   value: string;
   onChange: (val: string) => void;
   endIcon?: React.ReactNode;
+  required?: boolean; // Add this
 }
 
-const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon }: FloatingInputProps) => {
+const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon,required }: FloatingInputProps) => {
   const [focused, setFocused] = useState(false);
   const isActive = focused || value.length > 0;
 
@@ -33,6 +34,7 @@ const FloatingInput = ({ id, label, type = "text", value, onChange, endIcon }: F
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        required={required} // Pass it here
         className="w-full rounded-lg bg-transparent px-3 py-2 text-sm text-foreground outline-none"
         style={{ paddingRight: endIcon ? "2.5rem" : undefined }}
       />
@@ -71,6 +73,10 @@ const SellerLogin =  () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    if (!email || !password) {
+      setError('Please enter both email and password.');
+      return; // Stop the function here
+    }
 
     try {
       // 1. Call the login function from AuthContext
@@ -102,22 +108,15 @@ const SellerLogin =  () => {
         <p className="mt-1 text-center text-sm text-brand">Seller Login</p>
         {error && (
           
-          <div className="flex items-center gap-2 p-4 text-sm text-red-700 bg-red-50 rounded-lg border border-red-100 italic">
+          <div className="flex items-center gap-2 p-3 text-sm text-red-700 bg-red-50 rounded-lg border border-red-100 italic">
             <AlertCircle size={18} />
             <span className="text-xs">
             {error}   
-              
-
-              
                {accountExist && (
               <>
-              <Link href="/login/customer" className="ml-2 text-blue-500 underline">
-                      customer login
+              <Link href={error.endsWith("seller") ? "/login/seller/" : "/login/customer/"}  className="ml-2 text-blue-500 underline">
+                  Login here
               </Link>
-                {" "}or 
-                  <Link href="/signup/seller/" className="ml-2 text-blue-500 underline">
-                     seller signup
-                  </Link>
               </>
 
             )}
@@ -129,7 +128,7 @@ const SellerLogin =  () => {
         )}
 
         <form className="mt-8 space-y-5" onSubmit={ handleSubmit}>
-          <FloatingInput id="email" label="Email" type="email" value={email} onChange={setEmail} />
+          <FloatingInput id="email" label="Email" type="email" value={email} required onChange={setEmail} />
           
           <FloatingInput
             id="password"
@@ -137,6 +136,7 @@ const SellerLogin =  () => {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={setPassword}
+            required
             endIcon={
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-muted-foreground hover:text-foreground">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

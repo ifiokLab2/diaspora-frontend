@@ -1,0 +1,61 @@
+QA Report – Diaspora Platform
+1. Login Form Validation Issue
+Severity: Critical
+Area: Authentication
+Issue: Login form allows submission without password
+Impact: Poor UX, unnecessary backend requests
+2. Password Reset for Non-Existent Account
+Severity: Medium
+Area: Authentication
+“If you have an account, an email has been sent with password reset instructions.”
+3. Password Reset Link Broken / Expired
+Severity: Critical
+Area: Authentication
+Issue: Password reset link fails for registered accounts with:
+
+“Link expired or invalid. Please request a new one.”
+
+Impact: Blocks account recovery
+4. Weak Passwords Allowed
+Severity: High
+Area: Authentication / Security
+Issue: Users can create an account with a one-digit password
+Impact: Security risk
+5. Account Page – Address Not Updating
+Severity: High
+Area: User Profile / Checkout
+Issue: Adding a shipping address does not update the display; it still shows:
+
+“No default shipping address set. + Add Default Address”
+
+Impact: Confusing for users, may block checkout
+6. Cart – Increment Lag
+Severity: Medium
+Area: UX / Performance
+Issue: Incrementing item quantity in the cart feels laggy
+Impact: Poor user experience, may frustrate users
+7. Checkout – Delivery Profile Not Recognized
+Severity: Critical
+Area: Checkout / Profile
+Issue: Even with a shipping address added, the system prompts:
+
+“Please complete your delivery profile first”
+
+Impact: Users cannot proceed to checkout, blocking purchases
+
+
+
+
+
+
+
+
+
+
+
+
+
+For security reasons, many developers use the "Anti-Enumeration" pattern (which you already have in your code), where you return a success message regardless of whether the email exists. This prevents hackers from guessing which emails are registered on your site
+
+
+

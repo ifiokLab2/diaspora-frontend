@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import CartSummary from "@/components/cart-summary";
 import { useRouter, useSearchParams } from "next/navigation";
 
-
-
 const FloatingInput = ({
   label,
   name,
@@ -19,7 +17,6 @@ const FloatingInput = ({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
-  // Fix: Ensure value is never undefined/null to prevent uncontrolled warning
   const safeValue = value ?? "";
   const hasValue = safeValue.length > 0;
 
@@ -62,7 +59,6 @@ const FloatingSelect = ({
   options?: { id: string | number; name: string }[];
   disabled?: boolean;
 }) => {
-  // Fix: Ensure value is never undefined/null for selects
   const safeValue = value ?? "";
   const hasValue = safeValue !== "";
 
@@ -97,7 +93,6 @@ const FloatingSelect = ({
 };
 
 const CheckoutAddress = () => {
-  // Initialize with empty strings to ensure components start as "controlled"
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -109,12 +104,13 @@ const CheckoutAddress = () => {
     city: "",
     gender: "",
   });
-   const router = useRouter();
+
+  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams.get('callbackUrl');
 
-  const [countries, setCountries] = useState<{id: number, name: string}[]>([]);
-  const [cities, setCities] = useState<{id: number, name: string}[]>([]);
+  const [countries, setCountries] = useState<{ id: number, name: string }[]>([]);
+  const [cities, setCities] = useState<{ id: number, name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
 
@@ -129,7 +125,6 @@ const CheckoutAddress = () => {
         setCountries(geoRes.data.countries ?? []);
 
         if (profileRes.data) {
-          // Explicitly map keys and handle null values from Django
           setFormData({
             first_name: profileRes.data.first_name ?? "",
             last_name: profileRes.data.last_name ?? "",
@@ -143,7 +138,6 @@ const CheckoutAddress = () => {
           });
         }
       } catch (err) {
-        console.error("Initialization error:", err);
         toast.error("Failed to load profile data");
       } finally {
         setIsFetching(false);
@@ -170,8 +164,6 @@ const CheckoutAddress = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-
-    // Strict digit-only validation for phone numbers
     if ((name === "phone" || name === "phone_secondary") && !/^\d*$/.test(value)) return;
 
     setFormData((prev) => ({
@@ -181,20 +173,49 @@ const CheckoutAddress = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // VALIDATION LOGIC
+  const validateForm = () => {
+    const requiredFields = [
+      { key: "first_name", label: "First Name" },
+      { key: "last_name", label: "Last Name" },
+      { key: "phone", label: "Phone Number" },
+      { key: "address", label: "Delivery Address" },
+      { key: "country", label: "Country" },
+      { key: "city", label: "City" },
+      { key: "gender", label: "Gender" },
+    ];
+
+    for (const field of requiredFields) {
+      if (!formData[field.key as keyof typeof formData]?.toString().trim()) {
+        toast.error(`${field.label} is required`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // REUSABLE SAVE LOGIC
+  const handleSaveData = async () => {
+    if (!validateForm()) return false;
+
     setLoading(true);
     try {
       await api.patch("/auth/users/me/", formData);
-      toast.success("Account updated successfully!");
-      if (redirectTarget) {
-        router.push(redirectTarget);
-      }
+      toast.success("Account details saved!");
+      return true;
     } catch (error: any) {
-      //console.log('error:',error);
       toast.error(error.response?.data?.detail || "Update failed");
+      return false;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await handleSaveData();
+    if (success && redirectTarget) {
+      router.push(redirectTarget);
     }
   };
 
@@ -210,37 +231,34 @@ const CheckoutAddress = () => {
   return (
     <div className="min-h-screen bg-background mt-20 md:mt-30 py-2 px-[6%]">
       <div className="border-b bg-card h-2" />
-      <div className="shadow-xl w-full  px-6 py-8 flex lg:flex-row flex-col gap-8">
-        
-        
-        {/* form */}
+      <div className="shadow-xl w-full px-6 py-8 flex lg:flex-row flex-col gap-8">
         <div className="flex-1">
           <h1 className="text-xl font-bold text-foreground mb-6">Account Overview</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-2 gap-4">
-              <FloatingInput label="First Name" name="first_name" value={formData.first_name} onChange={handleChange} />
-              <FloatingInput label="Last Name" name="last_name" value={formData.last_name} onChange={handleChange} />
+              <FloatingInput label="First Name *" name="first_name" value={formData.first_name} onChange={handleChange} />
+              <FloatingInput label="Last Name *" name="last_name" value={formData.last_name} onChange={handleChange} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FloatingInput label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
+              <FloatingInput label="Phone Number *" name="phone" value={formData.phone} onChange={handleChange} />
               <FloatingInput label="Additional Phone Number" name="phone_secondary" value={formData.phone_secondary} onChange={handleChange} />
             </div>
 
-            <FloatingInput label="Delivery Address" name="address" value={formData.address} onChange={handleChange} />
-            <FloatingInput label="Additional Information" name="notes" value={formData.notes} onChange={handleChange} />
+            <FloatingInput label="Delivery Address *" name="address" value={formData.address} onChange={handleChange} />
+            <FloatingInput label="Additional Information (Notes)" name="notes" value={formData.notes} onChange={handleChange} />
 
             <div className="grid grid-cols-2 gap-4">
               <FloatingSelect 
-                label="Country" 
+                label="Country *" 
                 name="country" 
                 value={formData.country} 
                 onChange={handleChange} 
                 options={countries} 
               />
               <FloatingSelect 
-                label="City" 
+                label="City *" 
                 name="city" 
                 value={formData.city} 
                 onChange={handleChange} 
@@ -251,7 +269,7 @@ const CheckoutAddress = () => {
 
             <div className="max-w-[50%]">
               <FloatingSelect 
-                label="Gender" 
+                label="Gender *" 
                 name="gender" 
                 value={formData.gender} 
                 onChange={handleChange} 
@@ -265,13 +283,13 @@ const CheckoutAddress = () => {
                 disabled={loading}
                 className="bg-primary-yellow cursor-pointer hover:bg-yellow-500 px-10 rounded text-sm font-semibold text-black transition-all"
               >
-                {loading ? "Saving..." : "Save"}
+                {loading ? "Saving..." : "Save "}
               </Button>
             </div>
           </form>
         </div>
 
-        <CartSummary />
+        <CartSummary onCheckoutAttempt={handleSaveData} />
       </div>
     </div>
   );

@@ -1,71 +1,96 @@
 "use client";
-import { useState,useEffect } from "react";
-import art1 from "@/assets/arts.jpg";
-import { Trash2, Minus, Plus,ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { useCartStore } from '@/store/useCartStore';
-import { getImageUrl, formatCurrency, getDistanceInMiles } from '@/lib/utils';
+import { getImageUrl, formatCurrency } from '@/lib/utils';
 import { toast } from "react-hot-toast";
 import { useAuth } from '@/context/AuthContext';
 
+import { Loader2 } from "lucide-react";
 
-const CartSummary = () => {
- const { items, totalPrice, fetchCart, updateQuantity, removeItem, clearCart } = useCartStore();
+interface CartSummaryProps {
+  onCheckoutAttempt?: () => Promise<boolean>;
+}
+
+const CartSummary = ({ onCheckoutAttempt }: CartSummaryProps) => {
+  const { items, totalPrice, fetchCart } = useCartStore();
   const { isAuthenticated } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
 
-
-  // --- Checkout Logic ---
-  const handleCheckout = () => {
-    // Check for access token to verify if user is logged in
-   
+  const handleCheckout = async () => {
+    // 1. Auth Check
     if (!isAuthenticated) {
       toast.error("Please sign in to complete your purchase");
-      // Use callbackUrl to match your CustomerLogin.tsx logic
       router.push(`/login/customer?callbackUrl=${encodeURIComponent('/customer/checkout/summary/')}`);
       return;
     }
 
-    // If authenticated, move to checkout
-    router.push("/customer/checkout/summary/");
+    // 2. Prevent double clicks
+    setIsProcessing(true);
+    
+    try {
+      // 3. Trigger Parent Validation & Save
+      // This calls handleSaveData in CheckoutAddress.tsx
+      if (onCheckoutAttempt) {
+        const isSaved = await onCheckoutAttempt();
+        
+        // If validation fails or API fails, handleSaveData returns false
+        if (!isSaved) {
+          setIsProcessing(false);
+          return; // Stop and stay on the page so user can fix fields
+        }
+      }
+
+      // 4. If save was successful, proceed to summary
+      router.push("/customer/checkout/summary/");
+    } catch (error) {
+      toast.error("An unexpected error occurred. Please try again.");
+      setIsProcessing(false);
+    }
   };
 
-  // Ensure cart data is fresh on mount
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
 
   return (
-    <div className="bg-card rounded-sm shadow-sm p-5 w-full lg:w-[320px] h-fit">
-      <h3 className="text-sm font-bold text-foreground tracking-wide mb-3">CART SUMMARY</h3>
+    <div className="bg-card rounded-sm shadow-sm p-5 w-full lg:w-[320px] h-fit border">
+      <h3 className="text-sm font-bold text-foreground tracking-wide mb-3 uppercase">Cart Summary</h3>
       <hr className="border-border mb-4" />
 
-      <div className="space-y-4">
-        {items.map((item) => (
-          <div key={item.id} className="flex gap-3">
-            <Image
-                src={getImageUrl(item.product.main_image)}
-                alt={item.product.name}
-                className="w-16 h-16 object-cover rounded-sm flex-shrink-0"
-                width = {16}
-                height = {16}
-                
-              />
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-[#313133] leading-tight">{item.product.name}</p>
-              <p className="text-primary-yellow font-bold text-sm mt-1">
-                {item.product.discount_price}
-              </p>
-              <p className="text-xs text-muted-foreground">Qty:{item.quantity}</p>
+      <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div key={item.id} className="flex gap-3">
+              <div className="relative w-14 h-14 shrink-0 border rounded overflow-hidden bg-muted">
+                <Image
+                  src={getImageUrl(item.product.main_image)}
+                  alt={item.product.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-foreground leading-tight truncate">
+                  {item.product.name}
+                </p>
+                <p className="text-primary-yellow font-bold text-sm mt-1">
+                  {formatCurrency(item.product.discount_price)}
+                </p>
+                <p className="text-[10px] text-muted-foreground">Qty: {item.quantity}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-xs text-muted-foreground py-4 text-center">Your cart is empty</p>
+        )}
       </div>
 
       <div className="mt-4 text-center">
-        <Link href="/cart/" className="text-primary-yellow text-sm font-medium hover:underline">
+        <Link href="/cart/" className="text-primary-yellow text-[11px] font-bold hover:underline uppercase">
           Modify Cart
         </Link>
       </div>
@@ -75,13 +100,28 @@ const CartSummary = () => {
       <div className="flex justify-between items-center mb-4">
         <span className="text-sm font-semibold text-foreground">Subtotal</span>
         <span className="text-sm font-bold text-foreground">
-         £{totalPrice.toFixed(2)}
+          {formatCurrency(totalPrice)}
         </span>
       </div>
 
-      <button onClick={handleCheckout} className="cursor-pointer w-full bg-primary-yellow text-primary-foreground py-3 rounded-md text-sm font-bold hover:opacity-90 transition-opacity tracking-wide">
-        CHECKOUT (£{totalPrice.toFixed(2)})
+      <button 
+        onClick={handleCheckout} 
+        disabled={isProcessing || items.length === 0}
+        className="cursor-pointer w-full bg-primary-yellow text-black py-3 rounded-md text-sm font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" /> 
+            Processing...
+          </>
+        ) : (
+          `CHECKOUT (${formatCurrency(totalPrice)})`
+        )}
       </button>
+      
+      <p className="text-[9px] text-muted-foreground text-center mt-3 leading-relaxed">
+        By clicking Checkout, your delivery details will be validated and saved automatically.
+      </p>
     </div>
   );
 };

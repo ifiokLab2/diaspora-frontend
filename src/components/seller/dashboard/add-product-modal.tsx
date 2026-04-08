@@ -131,6 +131,12 @@ export function AddProductModal({ isOpen, onClose, onSubmit, editData }: AddProd
     e.preventDefault()
     //if (isDiscountInvalid) return
     if (!!isDiscountInvalid) return
+      console.log('hi..')
+    if (!editData && !imageFile && !previewUrl) {
+      toast.error("Please upload a main product image.")
+      return
+    }
+
 
     setLoading(true)
     const data = new FormData()
@@ -142,7 +148,9 @@ export function AddProductModal({ isOpen, onClose, onSubmit, editData }: AddProd
     data.append('city', formData.city)
     data.append('description', formData.description)
     
-    if (imageFile) data.append('main_image', imageFile)
+    if (imageFile){
+      data.append('main_image', imageFile)
+    }
 
     // Append Gallery Files
     galleryFiles.forEach((file) => {
@@ -199,7 +207,7 @@ export function AddProductModal({ isOpen, onClose, onSubmit, editData }: AddProd
               className="hidden" 
               accept="image/*" 
               onChange={handleImageChange} 
-              required={!editData && !previewUrl} 
+              //required={!editData && !previewUrl} 
             />
 
             {previewUrl ? (
@@ -310,6 +318,7 @@ export function AddProductModal({ isOpen, onClose, onSubmit, editData }: AddProd
           <div>
             <label className="text-[10px] font-black uppercase text-muted-foreground mb-2 block">Product Details</label>
             <textarea 
+            required
               rows={3} 
               className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm outline-none resize-none" 
               value={formData.description}
