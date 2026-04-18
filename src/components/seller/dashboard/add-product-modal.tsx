@@ -173,8 +173,12 @@ export function AddProductModal({ isOpen, onClose, onSubmit, editData }: AddProd
         toast.success("Product listed successfully!")
         router.push('/seller/dashboard/products/');
       }
-      //onSubmit()
-      //onSubmit(response.data)
+      if (onSubmit) {
+        onSubmit(response.data);
+      }
+
+      // 2. Close the modal
+      onClose();
     } catch (err: any) {
       toast.error(editData ? "Failed to update product." : "Failed to add product.")
     } finally {
