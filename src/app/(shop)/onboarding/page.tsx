@@ -138,7 +138,8 @@ export default function CreateShopProfilePage() {
       })
       updateProfileStatus()
       toast.success('Merchant account activated!')
-      router.push('/seller/dashboard')
+      //router.push('/seller/dashboard')
+      window.location.href = '/seller/dashboard'
     } catch (error: any) {
       setErrors(error.response?.data || {})
       toast.error('Failed to create profile.')
